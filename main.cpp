@@ -13,11 +13,11 @@ Vehiculos Aeroespaciales
 
 #include <iostream>
 
-//////////////////////////////////
-//								//
-//			 CONSTANTS 			//
-//								//
-//////////////////////////////////
+//
+//
+//			 CONSTANTS
+//
+//
 
 // general constants
 
@@ -47,11 +47,11 @@ const double ORBIT_TO_JUPITER   5.5*EARTH_ORBIT;        // m
 const double ORBIT_IN_SATURN    4.5e8+SATURN_RADIOUS;   // m
 
 
-//////////////////////////////////////
-//									//
-//			 PLANET CLASS 			//
-//									//
-//////////////////////////////////////
+//
+//
+//			 PLANET CLASS
+//
+//
 
 
 class Planet
@@ -65,11 +65,11 @@ private:
 
 
 
-//////////////////////////////////////
-//									//
-//			  MAIN METHOD 			//
-//									//
-//////////////////////////////////////
+//
+//
+//			  MAIN METHOD
+//
+//
 
 
 int main ()
