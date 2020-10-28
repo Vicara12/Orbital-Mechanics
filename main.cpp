@@ -11,11 +11,11 @@ Vehiculos Aeroespaciales
 Some default parameters for this program might be:
 
 min:        7.1492e7  m   (Jupiter's radious)
-max:        1e16      m
-precision:  0.001     m/s
+max:        1e15      m
+precision:  0.0001    m/s
 
-The computational cost of the algorithm is log2, so greater intervals should not
-be a problem.
+The computational cost of the algorithm is log2, so greater intervals or
+precission should not be a problem.
 
 expected iterations = log2((max-min)/precision)
 
@@ -40,7 +40,7 @@ Output computations lets the user see how the optimal radious is being searched.
 
 const double V_r   = 3565.7818; // m/s    radial speed
 const double V_ang = 5609.1811; // m/s    angular speed
-const double V_inf = 5609.1811; // m/s    speed at an "infinite" distance of Jupiter
+const double V_inf = 6646.6316; // m/s    speed at an "infinite" distance of Jupiter
 
 // MU values of the sun and Jupiter (G_constant * mass)
 
@@ -79,11 +79,12 @@ double postAssistanceSpeed (double radious, bool display = false)
 
    // compute the new V vector with the delta turn (relative to the sun)
    double new_V_r    = V_r*cos(delta) - V_ang*sin(delta);
-   double new_V_ang  = V_r*sin(delta) + V_ang*cos(delta) + jupiter_speed;
+   double new_V_ang  = jupiter_speed - (V_r*sin(delta) + V_ang*cos(delta));
    double new_V      = sqrt(new_V_r*new_V_r + new_V_ang*new_V_ang);
 
    if (display)
    {
+      std::cout << "delta: \t\t" << delta << "rad / " << (delta*180.0/M_PI) << " dg\n";
       std::cout << "radial speed: \t" << new_V_r << " m/s\n";
       std::cout << "angular speed: \t" << new_V_ang << " m/s\n";
       std::cout << "total speed: \t" << new_V << " m/s\n";
