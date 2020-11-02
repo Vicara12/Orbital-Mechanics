@@ -12,7 +12,8 @@ Some default parameters for this program might be:
 
 min:        7.1492e7  m   (Jupiter's radious)
 max:        1e15      m
-precision:  0.0001    m/s
+precision:  1         m
+max iters:  1e6
 
 The computational cost of the algorithm is log2, so greater intervals or
 precission should not be a problem.
@@ -48,10 +49,11 @@ const double MU_Jupiter = 6.67e-11*1.8982e27; // N*m2/Kg2 * Kg
 const double MU_Sun     = 6.67e-11*1.9890e30; // N*m2/Kg2 * Kg
 
 const double Jupiter_orbit_r  = 5.2*1.496e11; // m    5.2 UA
+const double Earth_orbit_r    = 1.496e11;    // m    1 UA
 
 const double Jupiter_radious  = 7.1492e7;     // m
 
-const double Target_speed     = 16019.4180;   // m/s     speed needed afer assistance
+const double Target_apoapsis     = 10.5*1.496e11;   // m     target apoapsis after asistence
 
 
 
@@ -82,12 +84,28 @@ double postAssistanceSpeed (double radious, bool display = false)
    double new_V_ang  = jupiter_speed - (V_r*sin(delta) + V_ang*cos(delta));
    double new_V      = sqrt(new_V_r*new_V_r + new_V_ang*new_V_ang);
 
+
+   // now calculate the parameters for the orbit after the encounter
+
+   // a can be obtained from the energy formula for eliptical orbits
+   double new_a = 1/(2/Jupiter_orbit_r - new_V*new_V/MU_Sun);
+
+   // e can be obtained from the angular momentum formula, taking into account
+   // that h = V_theta * r
+   double new_e = sqrt(1-pow(new_V_ang*Jupiter_orbit_r, 2)/(MU_Sun*new_a));
+
+   // this formula can be derived with the following formulas
+   // a = (R_apoapsis + R_periapsis)/2
+   // e = (R_apoapsis - R_periapsis)/(R_apoapsis + R_periapsis)
+   double new_ap = new_a*(new_e+1);
+
    if (display)
    {
       std::cout << "delta: \t\t" << delta << "rad / " << (delta*180.0/M_PI) << " dg\n";
       std::cout << "radial speed: \t" << new_V_r << " m/s\n";
       std::cout << "angular speed: \t" << new_V_ang << " m/s\n";
       std::cout << "total speed: \t" << new_V << " m/s\n";
+      std::cout << "apoapsis: \t" << new_ap << " m / " << (new_ap/Earth_orbit_r) << " UA\n";
    }
 }
 
@@ -108,44 +126,38 @@ double postAssistanceSpeed (double radious, bool display = false)
 bool findRaious (double min,
                  double max,
                  double precision,
+                 int max_iters,
+                 int& iters,
                  double& opt_radious,
                  bool verbose)
 {
-   int iteration = 0;
-   int expected = log2((max - min)/precision) + 1;
-
-   while (1)
+   for (int i = 0; i < max_iters; i++)
    {
+      iters = i;
+
       opt_radious = (max - min)/2 + min;
 
-      double v_after_encounter = postAssistanceSpeed(opt_radious);
+      double apoapsis_after_encounter = postAssistanceSpeed(opt_radious);
 
       // if verbose mode selected, output computations
       if (verbose)
       {
          std::cout << "\n\n\n";
-         std::cout << "iteration / expected iters: \t" << iteration << " / " <<
-                     expected << "\n";
+         std::cout << "iteration: \t" << i << "\n";
          std::cout << "min / max: \t" << min << " m / " << max << " m\n";
          std::cout << "current radious: \t" << opt_radious << " m\n";
-         std::cout << "v after encounter / target speed: \t" <<
-                     v_after_encounter << " m/s / " << Target_speed << " m/s\n";
+         std::cout << "apoapsis after encounter / target apoapsis: \t" <<
+                     apoapsis_after_encounter << " m / " << Target_apoapsis << " m\n";
          std::cout << "current precision / desired precision: \t" <<
-                     (abs(v_after_encounter - Target_speed)) << " m/s / " <<
-                     precision << " m/s\n";
+                     (abs(apoapsis_after_encounter - Target_apoapsis)) << " m / " <<
+                     precision << " m\n";
       }
 
       // if radious is valid, return true
-      if (abs(Target_speed - v_after_encounter) <= precision)  return true;
-
-      // if the remaining interval is smaller than the precission, no optimal
-      // radious exists in the given interval
-      if (abs(max - min) < precision)     return false;
+      if (abs(Target_apoapsis - apoapsis_after_encounter) <= precision)  return true;
 
       // if a new iteration is needed, readjust the values of min and max
-      v_after_encounter < Target_speed ?  max = opt_radious : min = opt_radious;
-
-      iteration++;
+      Target_apoapsis > apoapsis_after_encounter ?  max = opt_radious : min = opt_radious;
    }
 }
 
@@ -156,36 +168,48 @@ int main ()
    std::cout.precision(4);
 
    double min, max, precision;
+   int max_iters;
    std::string verbose;
 
-   std::cout << "\nminimum value for radious: "; std::cin >> min;
-   std::cout << "\nmaximum value for radious: "; std::cin >> max;
-   std::cout << "\nprecission: ";                std::cin >> precision;
-   std::cout << "\noutput computations(y/n): ";  std::cin >> verbose;
+   std::cout << "\nminimum value for radious: ";      std::cin >> min;
+   std::cout << "\nmaximum value for radious: ";      std::cin >> max;
+   std::cout << "\nprecission: ";                     std::cin >> precision;
+   std::cout << "\nmaximum number of iterations: \t"; std::cin >> max_iters;
+   std::cout << "\noutput computations(y/n): ";       std::cin >> verbose;
 
 
    double optimal_radious;
+   int iters;
    bool successful;
    
-   successful = findRaious(min, max, precision, optimal_radious, verbose == "y");
+   successful = findRaious(min,
+                           max,
+                           precision,
+                           max_iters,
+                           iters,
+                           optimal_radious,
+                           verbose == "y");
 
 
    // display results
    if (successful)
    {
       std::cout << "\n\nCOMPUTATION SUCCESSFUL\n";
+      std::cout << "iterations: \t" << iters << "\n";
       std::cout << "radious: \t" << optimal_radious << " m\n";
       std::cout << "height: \t" << (optimal_radious - Jupiter_radious) << " m\n";
 
       postAssistanceSpeed(optimal_radious, true);
       
-      std::cout << "target speed: \t" << Target_speed << " m/s\n";
+      std::cout << "target apoapsis: \t" << Target_apoapsis << " m/s\n";
    }
    else
    {
       std::cout << "\n\nCOMPUTATION FAILED\n";
       std::cout << "A suitable radious could not be found in the given ";
-      std::cout << "interval with the precision selected.\n";
+      std::cout << "interval with the precision selected.\n\n";
+      std::cout << "The closest value is:\n";
+
+      postAssistanceSpeed(optimal_radious, true);
    }
-   
 }
