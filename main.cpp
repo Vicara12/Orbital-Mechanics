@@ -69,7 +69,9 @@ enum output_mode {silent, normal, csv};
  * Calculates the speed of the spaceship relative to the sun after the encounter
  * with Jupiter given the darious of the periapsis (from the center of Jupiter).
  */
-double postAssistanceSpeed (double radious,bool pos_angle, bool display = false)
+double postAssistanceApoapsis (double radious,
+                               bool pos_angle,
+                               bool display = false)
 {
    // calculate excentricity of the orbit arround Jupiter
    double e = 1 + (V_inf*V_inf*radious)/MU_Jupiter;
@@ -103,11 +105,13 @@ double postAssistanceSpeed (double radious,bool pos_angle, bool display = false)
 
    if (display)
    {
-      std::cout << "delta: \t\t" << delta << " rad / " << (delta*180.0/M_PI) << " dg\n";
+      std::cout << "delta: \t\t" << delta << " rad / " << (delta*180.0/M_PI) <<
+         " dg\n";
       std::cout << "radial speed: \t" << new_V_r << " m/s\n";
       std::cout << "angular speed: \t" << new_V_ang << " m/s\n";
       std::cout << "total speed: \t" << new_V << " m/s\n";
-      std::cout << "apoapsis: \t" << new_ap << " m / " << (new_ap/Earth_orbit_r) << " UA\n";
+      std::cout << "apoapsis: \t" << new_ap << " m / " <<
+         (new_ap/Earth_orbit_r) << " UA\n";
    }
 }
 
@@ -148,7 +152,8 @@ bool findRaious (double min,
 
       opt_radious = (max - min)/2 + min;
 
-      double apoapsis_after_encounter = postAssistanceSpeed(opt_radious, pos_angle);
+      double apoapsis_after_encounter = postAssistanceApoapsis(opt_radious,
+                                                               pos_angle);
 
       // if verbose mode selected, output computations
       if (output == normal)
@@ -158,19 +163,22 @@ bool findRaious (double min,
          std::cout << "min / max: \t" << min << " m / " << max << " m\n";
          std::cout << "current radious: \t" << opt_radious << " m\n";
          std::cout << "apoapsis after encounter / target apoapsis: \t" <<
-                     apoapsis_after_encounter << " m / " << Target_apoapsis << " m\n";
+                     apoapsis_after_encounter << " m / " << Target_apoapsis <<
+                     " m\n";
          std::cout << "current precision / desired precision: \t" <<
-                     (abs(apoapsis_after_encounter - Target_apoapsis)) << " m / " <<
-                     precision << " m\n";
+                     (abs(apoapsis_after_encounter - Target_apoapsis)) <<
+                     " m / " << precision << " m\n";
       }
       else if (output == csv)
          std::cout << opt_radious << "," << apoapsis_after_encounter << "\n";
 
       // if radious is valid, return true
-      if (abs(Target_apoapsis - apoapsis_after_encounter) <= precision)  return true;
+      if (abs(Target_apoapsis - apoapsis_after_encounter) <= precision) 
+         return true;
 
       // if a new iteration is needed, readjust the values of min and max
-      Target_apoapsis > apoapsis_after_encounter ?  max = opt_radious : min = opt_radious;
+      Target_apoapsis > apoapsis_after_encounter ?  max = opt_radious :
+                                                    min = opt_radious;
    }
 
    return false;
@@ -228,9 +236,10 @@ int main ()
             std::cout << "\n\nCOMPUTATION SUCCESSFUL\n";
             std::cout << "iterations: \t" << iters << "\n";
             std::cout << "radious: \t" << optimal_radious << " m\n";
-            std::cout << "height: \t" << (optimal_radious - Jupiter_radious) << " m\n";
+            std::cout << "height: \t" << (optimal_radious - Jupiter_radious) <<
+               " m\n";
 
-            postAssistanceSpeed(optimal_radious, pos_angle, true);
+            postAssistanceApoapsis(optimal_radious, pos_angle, true);
             
             std::cout << "target apoapsis: \t" << Target_apoapsis << " m\n";
          }
@@ -242,7 +251,7 @@ int main ()
             std::cout << "The closest value is:\n";
 
             std::cout << "radious: \t" << optimal_radious << " m\n";
-            postAssistanceSpeed(optimal_radious, pos_angle, true);
+            postAssistanceApoapsis(optimal_radious, pos_angle, true);
          }
       }
    }
