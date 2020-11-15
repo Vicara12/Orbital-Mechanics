@@ -3,7 +3,7 @@
 This program is used to calculate the radius of a gravitational assistance from
 the Earth to Saturn using Jupiter.
 
-20 November 2020
+20 October 2020
 
 Vehiculos Aeroespaciales
 
