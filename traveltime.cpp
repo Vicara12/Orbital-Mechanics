@@ -4,9 +4,9 @@ This program is used to calculate the time it takes to complete part of an
 orbit (circular, eliptical or hiperbolic) given two angles or two radiuses
 and the mass of the body that it orbits.
 
-The zero angle is at the apoapsis and increase with the direction of the
-object's speed. The program internally works with the range [pi, -pi), but the
-format [0, 2*pi) is also accepted at the input.
+The zero angle is at the periapsis and increase with the direction of the
+object's movement. The program internally works with the range [pi, -pi), but
+the format [0, 2*pi) is also accepted at the input.
 
 13 November 2020
 
@@ -73,8 +73,6 @@ void computeOrbit (double a_i,
       double r2 = (ellipse ? 1 : -1) * a*(1-e*e)/(1+e*cos(ang + precission));
       double delta_x = sqrt(r1*r1 + r2*r2 - 2*r1*r2*cos(precission));
 
-      
-
       double v = sqrt(mass*G*(2/r1 + (ellipse ? -1 : 1)/a));
 
       total_distance += delta_x;
@@ -133,7 +131,7 @@ int main ()
    else
    {
       std::cout << "\n\nThe zero angle is at periapsis and it increases with\n";
-      std::cout << "the object's speed. Both formats [pi, -pi) and [0, 2*pi)\n";
+      std::cout << "the object's movement. Both formats [pi, -pi) and [0, 2*pi)\n";
       std::cout << "are accepted.\n";
 
       std::cout << "\ninitial angle: ";  std::cin >> a_i;
