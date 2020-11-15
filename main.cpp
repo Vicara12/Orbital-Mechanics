@@ -55,7 +55,7 @@ const double Jupiter_radious  = 7.1492e7;     // m
 
 const double Target_apoapsis     = 10.5*1.496e11;   // m     target apoapsis after asistence
 
-
+enum output_mode {silent, normal, csv};
 
 
 //
@@ -132,11 +132,14 @@ bool findRaious (double min,
                  int max_iters,
                  int& iters,
                  double& opt_radious,
-                 bool verbose)
+                 output_mode output)
 {
-   if (verbose)
+   if (output == normal)
       std::cout << "FINDING " << (pos_angle ? "POSITIVE" : "NEGATIVE")
             << " ANGLE:\n";
+   
+   else if (output == csv)
+      std::cout << (pos_angle ? "\n\npos\n\n" : "\nneg\n\n");
 
 
    for (int i = 0; i < max_iters; i++)
@@ -148,7 +151,7 @@ bool findRaious (double min,
       double apoapsis_after_encounter = postAssistanceSpeed(opt_radious, pos_angle);
 
       // if verbose mode selected, output computations
-      if (verbose)
+      if (output == normal)
       {
          std::cout << "\n\n\n";
          std::cout << "iteration: \t" << i << "\n";
@@ -160,6 +163,8 @@ bool findRaious (double min,
                      (abs(apoapsis_after_encounter - Target_apoapsis)) << " m / " <<
                      precision << " m\n";
       }
+      else if (output == csv)
+         std::cout << opt_radious << "," << apoapsis_after_encounter << "\n";
 
       // if radious is valid, return true
       if (abs(Target_apoapsis - apoapsis_after_encounter) <= precision)  return true;
@@ -185,16 +190,22 @@ int main ()
    std::cout << "\nmaximum value for radious: ";      std::cin >> max;
    std::cout << "\nprecission: ";                     std::cin >> precision;
    std::cout << "\nmaximum number of iterations: \t"; std::cin >> max_iters;
-   std::cout << "\noutput computations(y/n): ";       std::cin >> verbose;
+   std::cout << "\noutput computations(y/n/c): ";       std::cin >> verbose;
 
+   output_mode output = silent;
+   if (verbose == "y")  output = normal;
+   else if (verbose == "c") output = csv;
 
    // two iters, one for positive an other for negative turn angles
    for (int i = 0; i < 2; i++)
    {
       bool pos_angle = (i == 0); // indicates sign of turn angle
 
-      std::cout << "\n\n\n* SEARCHING OPTIMAL RADIOUS FOR " <<
+      if (output != csv)
+      {
+         std::cout << "\n\n\n* SEARCHING OPTIMAL RADIOUS FOR " <<
             (pos_angle ? "POSITIVE" : "NEGATIVE") << " TURN ANGLE\n";
+      }
 
       double optimal_radious;
       int iters;
@@ -207,30 +218,32 @@ int main ()
                               max_iters,
                               iters,
                               optimal_radious,
-                              verbose == "y");
+                              output);
 
-
-      // display results
-      if (successful)
+      if (output != csv)
       {
-         std::cout << "\n\nCOMPUTATION SUCCESSFUL\n";
-         std::cout << "iterations: \t" << iters << "\n";
-         std::cout << "radious: \t" << optimal_radious << " m\n";
-         std::cout << "height: \t" << (optimal_radious - Jupiter_radious) << " m\n";
+         // display results
+         if (successful)
+         {
+            std::cout << "\n\nCOMPUTATION SUCCESSFUL\n";
+            std::cout << "iterations: \t" << iters << "\n";
+            std::cout << "radious: \t" << optimal_radious << " m\n";
+            std::cout << "height: \t" << (optimal_radious - Jupiter_radious) << " m\n";
 
-         postAssistanceSpeed(optimal_radious, pos_angle, true);
-         
-         std::cout << "target apoapsis: \t" << Target_apoapsis << " m\n";
-      }
-      else
-      {
-         std::cout << "\n\nCOMPUTATION FAILED\n";
-         std::cout << "A suitable radious could not be found in the given ";
-         std::cout << "interval with the precision and turn angle sign selected.\n\n";
-         std::cout << "The closest value is:\n";
+            postAssistanceSpeed(optimal_radious, pos_angle, true);
+            
+            std::cout << "target apoapsis: \t" << Target_apoapsis << " m\n";
+         }
+         else
+         {
+            std::cout << "\n\nCOMPUTATION FAILED\n";
+            std::cout << "A suitable radious could not be found in the given ";
+            std::cout << "interval with the precision and turn angle sign selected.\n\n";
+            std::cout << "The closest value is:\n";
 
-         std::cout << "radious: \t" << optimal_radious << " m\n";
-         postAssistanceSpeed(optimal_radious, pos_angle, true);
+            std::cout << "radious: \t" << optimal_radious << " m\n";
+            postAssistanceSpeed(optimal_radious, pos_angle, true);
+         }
       }
    }
 }
