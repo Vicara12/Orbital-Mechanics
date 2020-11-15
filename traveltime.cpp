@@ -109,24 +109,28 @@ int main ()
 
    if (answer == "r")
    {
+      std::string radial_v;
+
       std::cout << "\ninitial radious: ";
       std::cin >> r_i;
 
       std::cout << "\nradial speed is positive? (y/n): ";
-      std::cin >> a_i_radial_speed_pos;
+      std::cin >> radial_v;
+      a_i_radial_speed_pos = (radial_v == "y");
 
       std::cout << "\nfinal radious: ";
       std::cin >> r_f;
 
       std::cout << "\nradial speed is positive? (y/n): ";
-      std::cin >> a_f_radial_speed_pos;
+      std::cin >> radial_v;
+      a_f_radial_speed_pos = (radial_v == "y");
 
       a_i = acos(((e < 1 ? 1 : -1) * a*(1-e*e)/r_i - 1)/e);
       a_f = acos(((e < 1 ? 1 : -1) * a*(1-e*e)/r_f - 1)/e);
 
       // if the object is going towards the mass, change the sign of the angles
-      if (a_i_radial_speed_pos)  a_i *= -1;
-      if (a_f_radial_speed_pos)  a_f *= -1;
+      if (not a_i_radial_speed_pos)  a_i *= -1;
+      if (not a_f_radial_speed_pos)  a_f *= -1;
 
       std::cout << "\nangles used: " << a_i << " to " << a_f << "\n\n";
    }
